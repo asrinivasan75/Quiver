@@ -56,6 +56,31 @@ Open a Claude Code session and run `/skills` (or whatever your harness uses to l
 | Skill | What it does |
 |-------|--------------|
 | [`parallel-blueprint`](skills/parallel-blueprint/) | Decomposes an idea or build prompt into a parallel-execution plan with frozen interface contracts, then produces a comprehensive PDF blueprint and a folder of per-terminal prompts (one per workstream + an integrator) ready to paste into separate Claude Code instances. |
+| [`test-craft`](skills/test-craft/) | Authors comprehensive, behavior-focused tests via a 3-phase generate → critique → refine loop. Phase 2 spawns an adversarial subagent that reviews the suite for missing cases, implementation-detail testing, hidden-failure mocks, and determinism issues; phase 3 applies the critique. |
+| [`quiver-upgrade`](skills/quiver-upgrade/) | Updates the local Quiver clone (`git fetch` + ff-only `git pull`) and reports which skills will pick up changes via symlink vs. need a manual re-copy. Pairs with a SessionStart hook that quietly checks for updates and prints a one-line notice in the session when new commits land on `origin/main`. |
+
+### Stay current automatically
+
+Wire `skills/quiver-upgrade/scripts/check-updates.sh` into your Claude Code SessionStart hook and you'll get a one-line `🏹 Quiver: N updates available. Run /quiver-upgrade to apply.` whenever there are new commits on `origin/main`. The check is local-only on the hot path; a background `git fetch` runs on a 4-hour cadence so the session is never blocked by network I/O.
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/skills/quiver-upgrade/scripts/check-updates.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ## Contributing a skill
 
