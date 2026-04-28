@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "quiver-plugins",
+  "version": "0.1.0",
+  "description": "Quiver — a single-plugin marketplace hosting the Quiver skill collection (parallel-blueprint, test-craft, quiver-upgrade).",
+  "owner": {
+    "name": "Aadithya Srinivasan"
+  },
+  "plugins": [
+    {
+      "name": "quiver",
+      "description": "Three skills for planning multi-terminal builds, authoring high-quality tests, and keeping the collection up to date.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Aadithya Srinivasan"
+      },
+      "source": ".",
+      "category": "productivity",
+      "homepage": "https://github.com/asrinivasan75/Quiver",
+      "repository": "https://github.com/asrinivasan75/Quiver",
+      "license": "MIT"
+    }
+  ]
+}

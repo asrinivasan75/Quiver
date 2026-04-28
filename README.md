@@ -4,66 +4,38 @@ A curated collection of [Claude skills](https://docs.claude.com/en/docs/claude-c
 
 Each skill lives in its own folder under `skills/` with a `SKILL.md` that has YAML frontmatter (`name`, `description`) plus any supporting templates and scripts. The format follows Anthropic's standard skill convention.
 
-## Installing a skill
+## Installing
 
-Claude Code looks for skills in two places:
+Three options, easiest first.
 
-| Scope | Path | Available in |
-|-------|------|--------------|
-| User  | `~/.claude/skills/<skill-name>/`           | every project |
-| Project | `<your-project>/.claude/skills/<skill-name>/` | that project only |
+### Option 1 — install as a Claude Code plugin (recommended)
 
-A skill is "installed" simply by placing its folder at one of those paths. The folder must contain a `SKILL.md` at its root; Claude reads the frontmatter to decide when to surface the skill.
+The repo ships its own one-plugin marketplace at `.claude-plugin/marketplace.json`, so you can add it as a marketplace and install the bundled plugin in two commands:
 
-### Option 1 — clone Quiver once, symlink the skills you want (recommended)
+```text
+/plugin marketplace add asrinivasan75/Quiver
+/plugin install quiver@quiver-plugins
+```
 
-This keeps a single working copy of the repo and lets you `git pull` to get updates. Symlinks mean the live skill files are always whatever Quiver has on disk.
+That's it. Claude Code installs the plugin under `~/.claude/plugins/`, registers all three skills automatically, and adds an entry to `enabledPlugins` in `~/.claude/settings.json`. The bundled `hooks/hooks.json` wires the SessionStart update-check hook for you. Open a new Claude Code session and the skills are available.
+
+To upgrade to a newer Quiver release, run `/plugin upgrade quiver@quiver-plugins` (or use `/quiver-upgrade` from inside a session — it works for plugin installs too, but the plugin path uses Claude Code's update mechanism).
+
+### Option 2 — clone once, symlink the skills you want (good for development)
+
+This keeps a single working copy of the repo and lets you `git pull` to get updates. Symlinks mean the live skill files are always whatever Quiver has on disk — useful if you're contributing skills or want bleeding-edge changes.
 
 ```bash
-# Clone the collection somewhere stable
 git clone https://github.com/asrinivasan75/Quiver.git ~/src/Quiver
-
-# Make sure your skills directory exists
 mkdir -p ~/.claude/skills
-
-# Symlink a specific skill into your user-level skills directory
 ln -s ~/src/Quiver/skills/parallel-blueprint ~/.claude/skills/parallel-blueprint
+ln -s ~/src/Quiver/skills/test-craft         ~/.claude/skills/test-craft
+ln -s ~/src/Quiver/skills/quiver-upgrade     ~/.claude/skills/quiver-upgrade
 ```
 
-To install into a single project instead of globally:
+To install into a single project instead of globally, replace `~/.claude/skills/` with `<your-project>/.claude/skills/`. Claude Code reads both paths.
 
-```bash
-mkdir -p /path/to/your/project/.claude/skills
-ln -s ~/src/Quiver/skills/parallel-blueprint /path/to/your/project/.claude/skills/parallel-blueprint
-```
-
-### Option 2 — copy a single skill (no symlink)
-
-If you'd rather pin a snapshot and avoid pulling updates accidentally:
-
-```bash
-git clone https://github.com/asrinivasan75/Quiver.git /tmp/Quiver
-cp -R /tmp/Quiver/skills/parallel-blueprint ~/.claude/skills/
-rm -rf /tmp/Quiver
-```
-
-### Verifying it loaded
-
-Open a Claude Code session and run `/skills` (or whatever your harness uses to list available skills). The skill should appear by name. Or simply describe a task that matches its trigger description — Claude will surface it automatically.
-
-## Skills shipped
-
-| Skill | What it does |
-|-------|--------------|
-| [`parallel-blueprint`](skills/parallel-blueprint/) | Decomposes an idea or build prompt into a parallel-execution plan with frozen interface contracts, then produces a comprehensive PDF blueprint and a folder of per-terminal prompts (one per workstream + an integrator) ready to paste into separate Claude Code instances. |
-| [`test-craft`](skills/test-craft/) | Authors comprehensive, behavior-focused tests via a 3-phase generate → critique → refine loop. Phase 2 spawns an adversarial subagent that reviews the suite for missing cases, implementation-detail testing, hidden-failure mocks, and determinism issues; phase 3 applies the critique. |
-| [`quiver-upgrade`](skills/quiver-upgrade/) | Updates the local Quiver clone (`git fetch` + ff-only `git pull`) and reports which skills will pick up changes via symlink vs. need a manual re-copy. Pairs with a SessionStart hook that quietly checks for updates and prints a one-line notice in the session when new commits land on `origin/main`. |
-
-### Stay current automatically
-
-Wire `skills/quiver-upgrade/scripts/check-updates.sh` into your Claude Code SessionStart hook and you'll get a one-line `🏹 Quiver: N updates available. Run /quiver-upgrade to apply.` whenever there are new commits on `origin/main`. The check is local-only on the hot path; a background `git fetch` runs on a 4-hour cadence so the session is never blocked by network I/O.
-
-Add to `~/.claude/settings.json`:
+If you go this route, wire the SessionStart update notice manually by adding to `~/.claude/settings.json`:
 
 ```json
 {
@@ -81,6 +53,37 @@ Add to `~/.claude/settings.json`:
   }
 }
 ```
+
+### Option 3 — copy a single skill (pinned snapshot)
+
+If you only want one skill and don't want it to update at all:
+
+```bash
+git clone https://github.com/asrinivasan75/Quiver.git /tmp/Quiver
+cp -R /tmp/Quiver/skills/parallel-blueprint ~/.claude/skills/
+rm -rf /tmp/Quiver
+```
+
+### Verifying it loaded
+
+Open a new Claude Code session and run `/context`. The skills should appear in the Skills list. Or just describe a task that matches a skill's trigger description — Claude will surface it automatically.
+
+### Don't double-install
+
+If you switch from Option 2/3 to Option 1, remove the symlinks/copies first to avoid duplicate skill registrations:
+
+```bash
+rm ~/.claude/skills/parallel-blueprint ~/.claude/skills/test-craft ~/.claude/skills/quiver-upgrade
+# also remove the manual SessionStart hook entry from ~/.claude/settings.json if you added one
+```
+
+## Skills shipped
+
+| Skill | What it does |
+|-------|--------------|
+| [`parallel-blueprint`](skills/parallel-blueprint/) | Decomposes an idea or build prompt into a parallel-execution plan with frozen interface contracts, then produces a comprehensive PDF blueprint and a folder of per-terminal prompts (one per workstream + an integrator) ready to paste into separate Claude Code instances. |
+| [`test-craft`](skills/test-craft/) | Authors comprehensive, behavior-focused tests via a 3-phase generate → critique → refine loop. Phase 2 spawns an adversarial subagent that reviews the suite for missing cases, implementation-detail testing, hidden-failure mocks, and determinism issues; phase 3 applies the critique. |
+| [`quiver-upgrade`](skills/quiver-upgrade/) | Updates the local Quiver clone (`git fetch` + ff-only `git pull`) and reports which skills will pick up changes via symlink vs. need a manual re-copy. Pairs with a SessionStart hook (auto-wired by the plugin install path, manual under Option 2) that prints `🏹 Quiver: N updates available` in-session when new commits land on `origin/main`. The hot path is local-only; a background `git fetch` runs on a 4-hour cadence so the session is never blocked by network I/O. |
 
 ## Contributing a skill
 

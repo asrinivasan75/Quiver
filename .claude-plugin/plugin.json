@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "quiver",
+  "version": "0.1.0",
+  "description": "A curated collection of Claude skills. Includes parallel-blueprint (decompose builds into parallel-execution plans with frozen interface contracts and per-terminal prompts), test-craft (3-phase generate-critique-refine test authoring), and quiver-upgrade (in-session update notifications and pull tooling).",
+  "author": {
+    "name": "Aadithya Srinivasan"
+  },
+  "homepage": "https://github.com/asrinivasan75/Quiver",
+  "repository": "https://github.com/asrinivasan75/Quiver",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "planning",
+    "testing",
+    "parallel-execution",
+    "hackathon",
+    "tdd"
+  ]
+}

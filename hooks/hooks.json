@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/quiver}/skills/quiver-upgrade/scripts/check-updates.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
